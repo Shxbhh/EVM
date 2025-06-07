@@ -1,4 +1,4 @@
-// UART Transmitter: 8N1 at 115200 baud, 50 MHz system clock
+// UART Transmitter: 8N1 at 115200 baud, 100 MHz system clock
 `timescale 1ns / 1ps
 module uart_tx(
 input  wire       clk,
@@ -7,7 +7,7 @@ input  wire       tx_start,
 input  wire [7:0] tx_data,
 output reg        tx
 );
-parameter CLK_FREQ = 50000000;
+parameter CLK_FREQ = 100000000;
 parameter BAUD     = 115200;
 localparam CLKS_PER_BIT = CLK_FREQ/BAUD;
 
@@ -47,3 +47,4 @@ always @(posedge clk or negedge rst_n) begin
         end
     end
 end
+endmodule
