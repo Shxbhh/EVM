@@ -27,6 +27,14 @@ foreach idx {0 1 2 3} pin {U2 U4 V4 W4} {
     set_property IOSTANDARD LVCMOS33 [get_ports "an[$idx]"]
 }
 
+# Map fp_uart_rx to JA1 (Basys 3 pin J15, 3.3 V TTL)
+set_property PACKAGE_PIN J15 [get_ports {fp_uart_rx}]
+set_property IOSTANDARD LVCMOS33 [get_ports {fp_uart_rx}]
+
+# Map fp_uart_tx to JA2 (Basys 3 pin J16, 3.3 V TTL)
+set_property PACKAGE_PIN J16 [get_ports {fp_uart_tx}]
+set_property IOSTANDARD LVCMOS33 [get_ports {fp_uart_tx}]
+
 # Button Inputs
 set_property PACKAGE_PIN U18 [get_ports btn_2]						
 set_property IOSTANDARD LVCMOS33 [get_ports btn_2]
