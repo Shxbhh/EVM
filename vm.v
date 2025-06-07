@@ -9,6 +9,9 @@ module top_voting_machine(
     input btn3,                // button for candidate 3
     input btn_oc,            // button for opening/closing voting
     input reset,                // button for system reset
+    input  wire fp_clk,        // clock for UART (tie to clk_100MHz)
+    input  wire fp_uart_rx,    // FPGA RX to R305 TX
+    output wire fp_uart_tx,    // FPGA TX to R305 RX
     output [0:6] seg,           // 7 segment cathodes
     output [3:0] an,            // 7 segment anodes
     output [15:0] led_op         // 16 LEDs show when voting is open
@@ -21,7 +24,10 @@ module top_voting_machine(
     wire [1:0] wwinner;
     wire wtens;
     wire [3:0] wones;
-    
+    wire [7:0] fp_rx_byte;
+    wire fp_rx_ready;
+    reg  fp_tx_start;
+    reg  fp_tx_data;
     // Instantiate inner modules
     // Hz Generators
     clk1Hz one(.clk_100MHz(clk_100MHz), .clk1(w_1Hz));
@@ -36,10 +42,27 @@ module top_voting_machine(
     binbcd b2b(.bin(wvote_count), .tens(wtens), .ones(wones));
     // LED Driver
     leds led_d(.clk_2(w_2Hz), .enable_led(w_en_leds), .led_op(led_op));
+    //UART 
+    uart_rx u_fp_uart_rx (
+    .clk      (fp_clk),
+    .rst_n    (~w_reset),
+    .rx       (fp_uart_rx),
+    .data_out (fp_rx_byte),
+    .data_ready(fp_rx_ready)
+    );
+
+    uart_tx u_fp_uart_tx (
+    .clk      (fp_clk),
+    .rst_n    (~w_reset),
+    .tx_start (fp_tx_start),
+    .tx_data  (fp_tx_data),
+    .tx       (fp_uart_tx)
+    );
     // State Machine
     votingmachine machine(.btn1(wbtn1), .btn2(wbtn2), .btn3(wbtn3), .btn_oc(wbtn_oc),.clk1(w_1Hz),  
-                     .reset(w_reset), .code(code), .winner(wwinner),.enable_led(w_en_leds),
-                     .vote_count(wvote_count), .state(wstate));
+                          .reset(w_reset), .code(code), .fp_clk(fp_clk), .fp_rx_byte   (fp_rx_byte),
+                          .fp_rx_ready (fp_rx_ready), .fp_tx_start (fp_tx_start), .fp_tx_data (fp_tx_data),
+                          .winner(wwinner),.enable_led(w_en_leds), .vote_count(wvote_count), .state(wstate));
     // 7 Segment Display Controller
     seg_7 seg7(.clk_100MHz(clk_100MHz),.reset(w_reset), .state(wstate), .tens(wtens), .ones(wones), 
                       .winner(wwinner), .seg(seg), .an(an));
